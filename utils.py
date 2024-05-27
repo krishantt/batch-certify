@@ -48,7 +48,7 @@ def send_mail(subject, body, bar):
 
         for i, item in data.iterrows():
             receiver_email = item.email
-            pdf_path = f"data/{item.loc['name']}.pdf"
+            pdf_path = f"./{FOLDER_PATH}/{item.loc['name']}.pdf"
 
             message = MIMEMultipart()
             message["From"] = sender_email
