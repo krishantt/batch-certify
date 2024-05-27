@@ -54,7 +54,8 @@ def check_password():
 
 def main_ui():
     st.title("Batch Certification Mailing System")
-    st.session_state.clicked_genall = False
+    if "clicked_genall" not in st.session_state:
+        st.session_state.clicked_genall = False
 
     uploaded_image = st.file_uploader("Choose a certificate template")
     col1, col2 = st.columns([5, 1])
