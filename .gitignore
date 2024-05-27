@@ -1,3 +1,4 @@
 data/
+certificates/
 __pycache__/
 .streamlit/secrets.toml

@@ -8,6 +8,8 @@ import os
 import streamlit as st
 import time
 
+FOLDER_PATH = "certificates"
+
 def put_text(image_path, text, position=(0,0), fontsize=100):
     image = Image.open(image_path)
     W, H = image.size
@@ -19,10 +21,12 @@ def put_text(image_path, text, position=(0,0), fontsize=100):
 
 def generate_batch(uploaded_image, x_cor, y_cor, font_size):
     data = st.session_state['data']
+    if not os.path.exists(FOLDER_PATH):
+        os.makedirs(FOLDER_PATH)
 
     for _, datae in data.iterrows():
         image = put_text(uploaded_image, datae.loc['name'], (x_cor, y_cor), font_size)
-        image.save(f"./data/{datae.loc['name']}.pdf")
+        image.save(f"./{FOLDER_PATH}/{datae.loc['name']}.pdf")
 
 def send_mail(subject, body, bar):
     data = st.session_state['data']
