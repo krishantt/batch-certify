@@ -12,21 +12,24 @@ def sample_image(image, x_corr, y_corr, fontsize):
     gen_image = put_text(image, text, (x_corr, y_corr), fontsize)
     st.image(gen_image, use_column_width=True)
 
-def load_data(data):
-    if data is None:
-        st.toast("Data not loaded", icon="🚨")
-        return None
-    data = pd.read_csv(data)
-    st.dataframe(data)
-    if 'email' not in data.columns:
+def load_data(data, ui_element):
+    try:
+        loaded_data = pd.read_csv(data)
+        st.session_state['data'] = loaded_data
+        ui_element = st.dataframe(loaded_data)
+    except Exception as e:
+        st.session_state['data'] = None
+        st.error(e)
+        return 
+    if 'email' not in loaded_data.columns:
         st.toast("email column not found", icon="🚨")
-        data = None
-    elif 'name' not in data.columns:
+        return
+    elif 'name' not in loaded_data.columns:
         st.toast("name column not found", icon="🚨")
-        data = None
+        return
     else:
         st.toast("Data Loaded", icon="✅")
-    return data
+    return
 
 def check_data():
     if 'data' not in st.session_state:
@@ -51,6 +54,7 @@ def check_password():
 
 def main_ui():
     st.title("Batch Certification Mailing System")
+    st.session_state.clicked_genall = False
 
     uploaded_image = st.file_uploader("Choose a certificate template")
     col1, col2 = st.columns([5, 1])
@@ -79,17 +83,19 @@ def main_ui():
             with col12:
                 gen_all = st.button("All", type="primary")
 
+    data_ui = st.empty()
+
     if data_button:
-        if 'data' not in st.session_state:
-            st.session_state['data'] = load_data(uploaded_data)
+        load_data(uploaded_data, data_ui)
 
     if gen_sample or gen_all:
         if uploaded_image is None:
             st.toast("Image not loaded", icon="🚨")
-        if check_data():
+        elif check_data():
             if gen_sample:
                 sample_image(uploaded_image, x_cor, y_cor, font_size)
             if gen_all:
+                st.session_state.clicked_genall = True
                 generate_batch(uploaded_image, x_cor, y_cor, font_size)
 
     mail_sub = st.text_input("Mail Subject", "Insert subject here...")
@@ -97,7 +103,7 @@ def main_ui():
     mail_b = st.button("Send Mail", use_container_width=True)
     my_bar = st.empty()
     if mail_b and check_data():
-        if uploaded_image is None:
-            st.toast("Image not loaded", icon="🚨")
+        if not st.session_state.clicked_genall:
+            st.toast("Generate All before sending the mail", icon="🚨")
         else:
             send_mail(mail_sub, mail_body, my_bar)
